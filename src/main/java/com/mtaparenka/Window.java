@@ -2,10 +2,11 @@ package com.mtaparenka;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL40;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
@@ -54,20 +55,26 @@ public class Window {
 
     private void loop() {
         GL.createCapabilities();
-
-        glClearColor(0.0f, 1.0f, 0.0f, 0.0f);
         long startTime = System.nanoTime();
         long endTime;
 
-        while (!glfwWindowShouldClose(window)) {
-            glClear(GL_COLOR_BUFFER_BIT);
-            glfwSwapBuffers(window);
-            glfwPollEvents();
+        var scene = new Scene();
 
+        while (!glfwWindowShouldClose(window)) {
             endTime = System.nanoTime();
             var dt = endTime-startTime;
-            System.out.println("FPS: " + ( 1.0f/dt*1E9));
+
+            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            scene.update(dt);
+            //System.out.println("FPS: " + ( 1.0f/dt*1E9));
             startTime = System.nanoTime();
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
         }
+
+        scene.dispose();
     }
 }

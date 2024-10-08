@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("com.gradleup.shadow") version("8.3.3")
 }
 
 group = "com.mtaparenka"
@@ -30,4 +31,10 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "com.mtaparenka.Game"
+    }
 }
