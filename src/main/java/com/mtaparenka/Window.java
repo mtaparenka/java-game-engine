@@ -2,7 +2,6 @@ package com.mtaparenka;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL40;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -58,11 +57,13 @@ public class Window {
         long startTime = System.nanoTime();
         long endTime;
 
-        var scene = new Scene();
+        var scene = new TestScene();
 
         while (!glfwWindowShouldClose(window)) {
             endTime = System.nanoTime();
             var dt = endTime-startTime;
+            /*glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable(GL_BLEND);*/
 
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
