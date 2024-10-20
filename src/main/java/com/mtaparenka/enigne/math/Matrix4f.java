@@ -99,6 +99,38 @@ public class Matrix4f {
         return this;
     }
 
+    //  m00   m10   m20   m30       2/r-l       0        0       -(r+l/r-l)
+    //  m01   m11   m21   m31   x   0       2/t-b        0       -(t+b/t-b)
+    //  m02   m12   m22   m32       0           0   -2/f-n       -(f+n/f-n)
+    //  m03   m13   m23   m33       0           0        0               1
+    public Matrix4f ortho(float left, float right, float bottom, float top, float near, float far) {
+        float lr = 2.0f / (right - left);
+        float tb = 2.0f / (top - bottom);
+        float fn = 2.0f / (near - far);
+        float rlrl = (left + right) / (left - right);
+        float tbtb = (bottom + top) / (bottom - top);
+        float fnfn = (near + far) / (near - far);
+
+        m30 = m00 * rlrl + m10 * tbtb + m20 * fnfn + m30;
+        m31 = m01 * rlrl + m11 * tbtb + m21 * fnfn + m31;
+        m32 = m02 * rlrl + m12 * tbtb + m22 * fnfn + m32;
+        m33 = m03 * rlrl + m13 * tbtb + m23 * fnfn + m33;
+        m00 = m00 * lr;
+        m01 = m01 * lr;
+        m02 = m02 * lr;
+        m03 = m03 * lr;
+        m10 = m10 * tb;
+        m11 = m11 * tb;
+        m12 = m12 * tb;
+        m13 = m13 * tb;
+        m20 = m20 * fn;
+        m21 = m21 * fn;
+        m22 = m22 * fn;
+        m23 = m23 * fn;
+
+        return this;
+    }
+
     public void get(FloatBuffer fb) {
         int position = fb.position();
         fb.put(new float[]{
