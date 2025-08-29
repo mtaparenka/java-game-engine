@@ -1,6 +1,11 @@
 package com.mtaparenka;
 
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
+import org.lwjgl.BufferUtils;
+
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -9,6 +14,8 @@ import static org.lwjgl.opengl.GL46.*;
 public class ShaderProgram {
     public final int vertexShaderID, fragmentShaderID;
     public final int programID;
+
+    private final FloatBuffer tmpBuffer16 = BufferUtils.createFloatBuffer(16);
 
     public ShaderProgram(String vertexShaderFilePath, String fragmentShaderFilePath) {
         vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -19,6 +26,7 @@ public class ShaderProgram {
 
         programID = glCreateProgram();
         linkProgram();
+        use();
     }
 
     private void compileVertexShader(String vertexShaderFilePath) {
@@ -58,7 +66,26 @@ public class ShaderProgram {
         }
     }
 
-    public void bind() {
+    public void setUniformMatrix4fv(String uniformName, Matrix4f matrix) {
+        int transLocation = glGetUniformLocation(programID, uniformName);
+        matrix.get(tmpBuffer16);
+        glUniformMatrix4fv(transLocation, false, tmpBuffer16);
+        tmpBuffer16.clear();
+    }
+
+    public void setUniform4fv(String uniformName, Vector4f vector) {
+        int transLocation = glGetUniformLocation(programID, uniformName);
+
+        glUniform4fv(transLocation, new float[]{vector.x, vector.y, vector.z, vector.w});
+    }
+
+
+    public void setUniformMatrix4fv(String uniformName, FloatBuffer fb) {
+        int transLocation = glGetUniformLocation(programID, uniformName);
+        glUniformMatrix4fv(transLocation, false, fb);
+    }
+
+    public void use() {
         glUseProgram(programID);
     }
 

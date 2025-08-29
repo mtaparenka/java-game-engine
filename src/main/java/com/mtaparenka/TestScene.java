@@ -1,71 +1,76 @@
 package com.mtaparenka;
 
+import com.mtaparenka.engine.camera.OrthographicCamera;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
+
 import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.glfw.GLFW.*;
 
 public class TestScene {
-    private int vbo;
-    private int ebo;
-    private int vao;
-
-
-    private float[] verticies = new float[] {
-            //position              //color             //tex coords
-            0.5f,  0.5f, 0.0f,      1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-            0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-            -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-            -0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 0.0f,   0.0f, 1.0f, // top left
-    };
-
-    private int[] indicies = new int[] {
-            0, 1, 3,   // first triangle
-            1, 2, 3    // second triangle
-    };
-
+    private final long windowId;
     private final ShaderProgram shaderProgram;
-    private final Texture texture;
+    private final OrthographicCamera camera;
+    private Sprite spriteA;
+    private Sprite spriteB;
+    private Sprite spriteC;
 
-    public TestScene() {
+    private final float cameraSpeed = 1f;
+
+    public TestScene(long windowId) {
+        this.windowId = windowId;
         shaderProgram = new ShaderProgram("assets/shaders/default_vertex.glsl", "assets/shaders/default_fragment.glsl");
-        texture = new Texture("assets/sprites/adventurer-air-attack1-01.png");
-        createVertexArrayObject();
+        spriteA = new Sprite("assets/sprites/adventurer-air-attack1-01.png", 0f, 0f, 50f, 50f);
+        spriteB = new Sprite("assets/sprites/adventurer-air-attack1-01.png", 500f, 200f, 50f, 50f);
+        spriteC = new Sprite("assets/sprites/adventurer-air-attack1-01.png", 0f, 550f, 50f, 50f);
+
+        // model is a world-coordinate matrix, e.g. object placed at x = 100px, y = 200px
+        Matrix4f model = new Matrix4f()
+                .identity()
+                .translate(0f, 0f, 0f);
+
+        shaderProgram.setUniformMatrix4fv("model", model);
+
+        camera = new OrthographicCamera(0f, 800f, 600f, 0f); // 0.0 top-left
     }
 
-    private void createVertexArrayObject() {
-        vbo = glGenBuffers();
-        ebo = glGenBuffers();
-        vao = glGenVertexArrays();
-        glBindVertexArray(vao);
+    public void update(double dt) {
+        //camera
+        shaderProgram.setUniformMatrix4fv("projection", camera.projection);
+        shaderProgram.setUniformMatrix4fv("view", camera.view);
+        shaderProgram.setUniform4fv("spriteColor", new Vector4f(1f, 1f, 1f, 1f));
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, verticies, GL_STATIC_DRAW);
+        processInput();
+        camera.update();
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies, GL_STATIC_DRAW);
-
-        int stride = 8 * Float.BYTES;
-        int colorPointer = 3 * Float.BYTES;
-        int texPointer = 6 * Float.BYTES;
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, colorPointer);
-        glVertexAttribPointer(2, 2, GL_FLOAT, false, stride, texPointer);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glEnableVertexAttribArray(2);
-    }
-
-    public void update(float dt) {
-        shaderProgram.bind();
-        texture.bind();
-        glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        texture.unbind();
+        //draw sprites
+        spriteA.draw(dt);
+        spriteB.draw(dt);
+        spriteC.draw(dt);
     }
 
     public void dispose() {
-        glDeleteVertexArrays(vao);
-        glDeleteBuffers(vbo);
-        glDeleteBuffers(ebo);
         shaderProgram.dispose();
+    }
+
+    public void processInput() {
+        if (glfwGetKey(windowId, GLFW_KEY_UP) == GLFW_PRESS) {
+            camera.position.y -= cameraSpeed;
+        }
+        if (glfwGetKey(windowId, GLFW_KEY_DOWN) == GLFW_PRESS) {
+            camera.position.y += cameraSpeed;
+        }
+        if (glfwGetKey(windowId, GLFW_KEY_LEFT) == GLFW_PRESS) {
+            camera.position.x -= cameraSpeed;
+        }
+        if (glfwGetKey(windowId, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+            camera.position.x += cameraSpeed;
+        }
+        if (glfwGetKey(windowId, GLFW_KEY_PAGE_UP) == GLFW_PRESS) {
+            camera.setZoom(camera.zoom + 0.5f);
+        }
+        if (glfwGetKey(windowId, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS) {
+            camera.setZoom(camera.zoom - 0.5f);
+        }
     }
 }

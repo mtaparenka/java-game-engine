@@ -1,4 +1,4 @@
-package com.mtaparenka.enigne.math;
+package com.mtaparenka.engine.math;
 
 import java.nio.FloatBuffer;
 
