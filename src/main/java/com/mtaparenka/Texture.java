@@ -11,7 +11,7 @@ import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 
 public class Texture {
-    private final int texId;
+    public final int texId;
 
     public Texture(String imagePath) {
         texId = glGenTextures();
@@ -39,6 +39,8 @@ public class Texture {
             format = GL_RGB;
         } else if (channels.get(0) == 4) {
             format = GL_RGBA;
+        } else if (channels.get(0) == 1){
+            format = GL_RED;
         }
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, width.get(0), height.get(0), 0, format, GL_UNSIGNED_BYTE, imageData);

@@ -4,28 +4,8 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
-import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
-import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
-import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
-import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
-import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
-import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
-import static org.lwjgl.glfw.GLFW.glfwGetTime;
-import static org.lwjgl.glfw.GLFW.glfwInit;
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
-import static org.lwjgl.glfw.GLFW.glfwShowWindow;
-import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
-import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
-import static org.lwjgl.glfw.GLFW.glfwTerminate;
-import static org.lwjgl.glfw.GLFW.glfwWindowHint;
-import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
-import static org.lwjgl.opengl.GL46.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL46.glClear;
-import static org.lwjgl.opengl.GL46.glClearColor;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
@@ -47,13 +27,12 @@ public class Window {
 
         window = glfwCreateWindow(1920, 1080, "Pong", NULL, NULL);
 
-        glfwSetMouseButtonCallback(window, MouseEventListener::mouseButtonCallback);
-        glfwSetKeyCallback(window, Window::keys);
-
         if (window == NULL) {
             throw new RuntimeException("Failed to create window");
         }
 
+        glfwSetMouseButtonCallback(window, MouseEventListener::mouseButtonCallback);
+        glfwSetKeyCallback(window, Window::keys);
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1);
         glfwShowWindow(window);
@@ -82,20 +61,19 @@ public class Window {
     }
 
     private void loop() {
-
         while (!glfwWindowShouldClose(window)) {
             double currentFrame = glfwGetTime();
             dt = currentFrame - lastFrame;
             lastFrame = currentFrame;
-            /*glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glEnable(GL_BLEND);*/
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable(GL_BLEND);
 
 
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
             scene.update(dt);
-            System.out.printf("FPS: %.0f%n", (1.0f / dt));
+            //System.out.printf("FPS: %.0f%n", (1.0f / dt));
 
             glfwSwapBuffers(window);
             glfwPollEvents();

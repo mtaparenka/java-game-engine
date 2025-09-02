@@ -1,24 +1,27 @@
 package com.mtaparenka;
 
-import static org.lwjgl.opengl.GL46.*;
-import static org.lwjgl.glfw.GLFW.*;
+import org.joml.Vector4f;
 
-public class Sprite {
+import static org.lwjgl.opengl.GL46.*;
+
+public class SpriteRenderer {
+    public ShaderProgram shaderProgram;
     private float[] verticies;
 
-    private int[] indicies = new int[] {
+    private int[] indicies = new int[]{
             0, 1, 3,   // first triangle
             1, 2, 3    // second triangle
     };
 
     private final Texture texture;
+    private final Vector4f color;
 
     private int vbo;
     private int ebo;
     private int vao;
 
-    public Sprite(String texturePath, float x, float y, float width, float height) {
-        verticies = new float[] {
+    public SpriteRenderer(String texturePath, Vector4f color, float x, float y, float width, float height, ShaderProgram shaderProgram) {
+        verticies = new float[]{ // top and bot can actually be reversed depending on matrix orientation
                 //position                          //tex coords
                 x + width,  y + height,  0.0f,      1.0f, 1.0f, // top right
                 x + width,  y,           0.0f,      1.0f, 0.0f, // bottom right
@@ -27,8 +30,14 @@ public class Sprite {
         };
 
         texture = new Texture(texturePath);
+        this.color = color;
+        this.shaderProgram = shaderProgram;
 
         createVertexArrayObject();
+    }
+
+    public static SpriteRenderer plainShape(Vector4f color, float x, float y, float width, float height, ShaderProgram shaderProgram) {
+        return new SpriteRenderer("assets/sprites/white.png", color, x, y, width, height, shaderProgram);
     }
 
     private void createVertexArrayObject() {
@@ -38,10 +47,10 @@ public class Sprite {
         glBindVertexArray(vao);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, verticies, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, verticies, GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies, GL_DYNAMIC_DRAW);
 
         int stride = 5 * Float.BYTES;
         int texPointer = 3 * Float.BYTES;
@@ -55,6 +64,8 @@ public class Sprite {
     public void draw(double dt) {
         texture.bind();
         glBindVertexArray(vao);
+        shaderProgram.setUniform4fv("spriteColor", color);
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         texture.unbind();
     }
