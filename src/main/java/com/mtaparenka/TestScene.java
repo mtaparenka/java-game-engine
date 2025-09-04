@@ -9,10 +9,7 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 public class TestScene {
-    private static final String DEFAULT_VERTEX = "assets/shaders/default_vertex.glsl";
-    private static final String DEFAULT_FRAGMENT = "assets/shaders/default_fragment.glsl";
     private final long windowId;
-    private final ShaderProgram shaderProgram;
     private final OrthographicCamera camera;
     private SpriteRenderer player1;
     private SpriteRenderer player2;
@@ -22,27 +19,26 @@ public class TestScene {
 
     public TestScene(long windowId) {
         this.windowId = windowId;
-        shaderProgram = new ShaderProgram(DEFAULT_VERTEX, DEFAULT_FRAGMENT);
 
         Vector4f whiteColor = new Vector4f(1f, 1f, 1f, 1f);
         BitmapFont bitmapFont = new BitmapFont("assets/fonts/boldpixels.fnt", new Texture("assets/fonts/boldpixels_0.png"));
         //player1 = SpriteRenderer.plainShape(whiteColor, 0f, 0f, 2f, 24f, shaderProgram);
-        player1 = new SpriteRenderer("assets/sprites/adventurer-air-attack1-01.png", whiteColor, 0f, 0f, 32f, 32f, shaderProgram);
-        testText = new TextRenderer(shaderProgram, bitmapFont, whiteColor, "Aliaksandra", 0f, 50f);
+        player1 = new SpriteRenderer("assets/sprites/adventurer-air-attack1-01.png", whiteColor, 0f, 0f, 32f, 32f);
+        testText = new TextRenderer(bitmapFont, "Sasul\nnew line", 0f, 50f);
 
         // model is a world-coordinate matrix, e.g. object placed at x = 100px, y = 200px
         Matrix4f model = new Matrix4f()
                 .identity()
                 .translate(0f, 0f, 0f);
 
-        shaderProgram.setUniformMatrix4fv("model", model);
+        ShaderContext.get().setUniformMatrix4fv("model", model);
 
         camera = new OrthographicCamera(0f, 104f, 104f, 0f); // 0.0 top-left
     }
 
     public void update(double dt) {
         //camera
-        shaderProgram.setUniformMatrix4fv("projectionView", camera.combined);
+        ShaderContext.get().setUniformMatrix4fv("projectionView", camera.combined);
 
         processInput();
         camera.update();
@@ -55,7 +51,7 @@ public class TestScene {
     }
 
     public void dispose() {
-        shaderProgram.dispose();
+
     }
 
     public void processInput() {

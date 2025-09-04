@@ -5,7 +5,6 @@ import org.joml.Vector4f;
 import static org.lwjgl.opengl.GL46.*;
 
 public class SpriteRenderer {
-    public ShaderProgram shaderProgram;
     private float[] verticies;
 
     private int[] indicies = new int[]{
@@ -20,7 +19,7 @@ public class SpriteRenderer {
     private int ebo;
     private int vao;
 
-    public SpriteRenderer(String texturePath, Vector4f color, float x, float y, float width, float height, ShaderProgram shaderProgram) {
+    public SpriteRenderer(String texturePath, Vector4f color, float x, float y, float width, float height) {
         verticies = new float[]{ // top and bot can actually be reversed depending on matrix orientation
                 //position                          //tex coords
                 x + width,  y + height,  0.0f,      1.0f, 1.0f, // top right
@@ -31,13 +30,12 @@ public class SpriteRenderer {
 
         texture = new Texture(texturePath);
         this.color = color;
-        this.shaderProgram = shaderProgram;
 
         createVertexArrayObject();
     }
 
-    public static SpriteRenderer plainShape(Vector4f color, float x, float y, float width, float height, ShaderProgram shaderProgram) {
-        return new SpriteRenderer("assets/sprites/white.png", color, x, y, width, height, shaderProgram);
+    public static SpriteRenderer plainShape(Vector4f color, float x, float y, float width, float height) {
+        return new SpriteRenderer("assets/sprites/white.png", color, x, y, width, height);
     }
 
     private void createVertexArrayObject() {
@@ -64,7 +62,7 @@ public class SpriteRenderer {
     public void draw(double dt) {
         texture.bind();
         glBindVertexArray(vao);
-        shaderProgram.setUniform4fv("spriteColor", color);
+        ShaderContext.get().setUniform4fv("spriteColor", color);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         texture.unbind();

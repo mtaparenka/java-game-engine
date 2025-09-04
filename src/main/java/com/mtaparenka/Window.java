@@ -9,6 +9,9 @@ import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
+    private static final String DEFAULT_VERTEX = "assets/shaders/default_vertex.glsl";
+    private static final String DEFAULT_FRAGMENT = "assets/shaders/default_fragment.glsl";
+
     private static double dt = 0.0f;
     private static double lastFrame = 0.0f;
     public long window;
@@ -38,6 +41,8 @@ public class Window {
         glfwShowWindow(window);
 
         GL.createCapabilities();
+
+        ShaderContext.set(new ShaderProgram(DEFAULT_VERTEX, DEFAULT_FRAGMENT));
     }
 
     public void setScene(TestScene scene) {
@@ -73,12 +78,13 @@ public class Window {
             glClear(GL_COLOR_BUFFER_BIT);
 
             scene.update(dt);
-            //System.out.printf("FPS: %.0f%n", (1.0f / dt));
+            //System.out.printf("%.0f%n", (1.0f / dt));
 
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
 
         scene.dispose();
+        ShaderContext.get().dispose();
     }
 }
