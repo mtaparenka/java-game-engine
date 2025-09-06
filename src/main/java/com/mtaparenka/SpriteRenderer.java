@@ -1,76 +1,56 @@
 package com.mtaparenka;
 
+import com.mtaparenka.engine.render.Base2DRenderer;
+import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import static org.lwjgl.opengl.GL46.*;
 
 public class SpriteRenderer {
-    private float[] verticies;
+    private Base2DRenderer renderer;
+    public Vector2f position;
+    public float width;
+    public float height;
 
-    private int[] indicies = new int[]{
-            0, 1, 3,   // first triangle
-            1, 2, 3    // second triangle
-    };
+    public SpriteRenderer(String texturePath, Vector4f color, Vector2f position, float width, float height) {
+        this.position = position;
+        this.width = width;
+        this.height = height;
 
-    private final Texture texture;
-    private final Vector4f color;
+        int vbo = glGenBuffers();
+        int ebo = glGenBuffers();
+        int vao = glGenVertexArrays();
 
-    private int vbo;
-    private int ebo;
-    private int vao;
+        renderer = new Base2DRenderer(vao, vbo, ebo, new Texture(texturePath), position, color, 1);
 
-    public SpriteRenderer(String texturePath, Vector4f color, float x, float y, float width, float height) {
-        verticies = new float[]{ // top and bot can actually be reversed depending on matrix orientation
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        buildBVertexBuffer();
+    }
+
+    public static SpriteRenderer plainShape(Vector4f color, Vector2f position, float width, float height) {
+        return new SpriteRenderer("assets/sprites/white.png", color, position, width, height);
+    }
+
+    private void buildBVertexBuffer() {
+        float[] verticies = new float[]{ // top and bot can actually be reversed depending on matrix orientation
                 //position                          //tex coords
-                x + width,  y + height,  0.0f,      1.0f, 1.0f, // top right
-                x + width,  y,           0.0f,      1.0f, 0.0f, // bottom right
-                x,          y,           0.0f,      0.0f, 0.0f, // bottom left
-                x,          y + height,  0.0f,      0.0f, 1.0f, // top left
+                position.x + width,  position.y + height,     1.0f, 1.0f, // top right
+                position.x + width,  position.y,              1.0f, 0.0f, // bottom right
+                position.x,          position.y,              0.0f, 0.0f, // bottom left
+                position.x,          position.y + height,     0.0f, 1.0f, // top left
         };
 
-        texture = new Texture(texturePath);
-        this.color = color;
-
-        createVertexArrayObject();
-    }
-
-    public static SpriteRenderer plainShape(Vector4f color, float x, float y, float width, float height) {
-        return new SpriteRenderer("assets/sprites/white.png", color, x, y, width, height);
-    }
-
-    private void createVertexArrayObject() {
-        vbo = glGenBuffers();
-        ebo = glGenBuffers();
-        vao = glGenVertexArrays();
-        glBindVertexArray(vao);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, verticies, GL_DYNAMIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies, GL_DYNAMIC_DRAW);
-
-        int stride = 5 * Float.BYTES;
-        int texPointer = 3 * Float.BYTES;
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, stride, texPointer);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
+        renderer.renderCount = verticies.length / 16;
+        renderer.bufferSubData(verticies);
     }
 
     public void draw(double dt) {
-        texture.bind();
-        glBindVertexArray(vao);
-        ShaderContext.get().setUniform4fv("spriteColor", color);
-
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        texture.unbind();
+        renderer.draw(dt);
     }
 
     public void dispose() {
-        glDeleteVertexArrays(vao);
-        glDeleteBuffers(vbo);
-        glDeleteBuffers(ebo);
+        renderer.dispose();
     }
 }

@@ -2,28 +2,23 @@ package com.mtaparenka;
 
 import com.mtaparenka.engine.font.BitmapFont;
 import com.mtaparenka.engine.font.Glyph;
+import com.mtaparenka.engine.render.Base2DRenderer;
+import org.joml.Vector2f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 
 import static org.lwjgl.opengl.GL46.*;
 
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 public class TextRenderer {
-    private int vao, vbo, ebo;
-    private float x, y;
-    private final int maxChars;
-    private BitmapFont font;
-    private Vector4f color;
-    private int renderCount;
+    private final BitmapFont font;
+    private final Base2DRenderer renderer;
+    public Vector2f position;
 
-    public TextRenderer(BitmapFont font, Vector4f color, String text, float x, float y, int maxChars) {
+    public TextRenderer(BitmapFont font, Vector4f color, String text, Vector2f position, int maxChars) {
         this.font = font;
-        this.color = color;
-        this.x = x;
-        this.y = y;
-        this.maxChars = maxChars;
+        this.position = position;
 
         //fix single channeling
         font.atlasTexture.bind();
@@ -33,64 +28,36 @@ public class TextRenderer {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
         font.atlasTexture.unbind();
 
-        vbo = glGenBuffers();
-        ebo = glGenBuffers();
-        vao = glGenVertexArrays();
+        int vao = glGenVertexArrays();
+        int vbo = glGenBuffers();
+        int ebo = glGenBuffers();
 
-        glBindVertexArray(vao);
+        renderer = new Base2DRenderer(vao, vbo, ebo, font.atlasTexture, position, color, maxChars);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, maxChars * 16L * Float.BYTES, GL_DYNAMIC_DRAW); // 8 xy and 8 uv = 16
-        IntBuffer indiciesBuffer = BufferUtils.createIntBuffer(maxChars * 6);
-
-        for (int i = 0; i < maxChars; i++) {
-            int indexOffset = i * 4;
-
-            indiciesBuffer.put(new int[] {
-                    indexOffset, indexOffset + 1, indexOffset + 3,        // first triangle
-                    indexOffset + 1, indexOffset + 2, indexOffset + 3     // second triangle
-            });
-        }
-
-        indiciesBuffer.flip();
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indiciesBuffer, GL_STATIC_DRAW);
-
-        int stride = 4 * Float.BYTES;
-        int texPointer = 2 * Float.BYTES;
-
-        glVertexAttribPointer(0, 2, GL_FLOAT, false, stride, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, stride, texPointer);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-
-        buildBuffer(text);
+        setText(text);
     }
 
-    public TextRenderer(BitmapFont font, Vector4f color, String text, float x, float y) {
-        this(font, color, text, x, y, 256);
+    public TextRenderer(BitmapFont font, Vector4f color, String text, Vector2f position) {
+        this(font, color, text, position, 256);
     }
 
-    public TextRenderer(BitmapFont font, String text, float x, float y) {
-        this(font, new Vector4f(1f), text, x, y, 256);
+    public TextRenderer(BitmapFont font, String text, Vector2f position) {
+        this(font, new Vector4f(1f), text, position, 256);
     }
 
-    public void buildBuffer(String text) {
-        renderCount = 0;
+    public void setText(String text) {
         FloatBuffer verticiesBuffer = BufferUtils.createFloatBuffer(16 * text.length());
-        float advancedX = x;
-        float advanceY = y;
+        float advancedX = position.x;
+        float advanceY = position.y;
 
         for (int i = 0; i < text.length(); i++) {
             int codePoint = text.codePointAt(i);
 
             if (codePoint == 10) {
-                advancedX = x;
+                advancedX = position.x;
                 advanceY += font.lineHeight;
             } else {
                 Glyph g = font.glyphs.get(text.codePointAt(i));
-
                 float x0 = advancedX + g.xOffset();
                 float y0 = advanceY + g.yOffset();
                 float x1 = x0 + g.width();
@@ -112,18 +79,15 @@ public class TextRenderer {
         }
 
         verticiesBuffer.flip();
-        renderCount = verticiesBuffer.limit() / 16;
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, verticiesBuffer);
+        renderer.renderCount = verticiesBuffer.limit() / 16;
+        renderer.bufferSubData(verticiesBuffer);
     }
 
     public void draw(double dt) {
-        font.atlasTexture.bind();
-        glBindVertexArray(vao);
-        ShaderContext.get().setUniform4fv("spriteColor", color);
+        renderer.draw(dt);
+    }
 
-        glDrawElements(GL_TRIANGLES, renderCount * 6, GL_UNSIGNED_INT, 0);
-        font.atlasTexture.unbind();
+    public void dispose() {
+        renderer.dispose();
     }
 }

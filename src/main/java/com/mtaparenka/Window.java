@@ -12,7 +12,6 @@ public class Window {
     private static final String DEFAULT_VERTEX = "assets/shaders/default_vertex.glsl";
     private static final String DEFAULT_FRAGMENT = "assets/shaders/default_fragment.glsl";
 
-    private static double dt = 0.0f;
     private static double lastFrame = 0.0f;
     public long window;
     private TestScene scene;
@@ -66,18 +65,20 @@ public class Window {
     }
 
     private void loop() {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+        double dt;
+
         while (!glfwWindowShouldClose(window)) {
             double currentFrame = glfwGetTime();
             dt = currentFrame - lastFrame;
             lastFrame = currentFrame;
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glEnable(GL_BLEND);
-
 
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
             scene.update(dt);
+
             //System.out.printf("%.0f%n", (1.0f / dt));
 
             glfwSwapBuffers(window);
