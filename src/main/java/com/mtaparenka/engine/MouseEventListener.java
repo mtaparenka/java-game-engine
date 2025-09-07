@@ -1,4 +1,4 @@
-package com.mtaparenka;
+package com.mtaparenka.engine;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;

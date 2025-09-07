@@ -1,4 +1,6 @@
-package com.mtaparenka;
+package com.mtaparenka.pong;
+
+import com.mtaparenka.engine.Window;
 
 public class Game {
     public static void main(String[] args) {

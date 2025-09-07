@@ -1,10 +1,9 @@
-package com.mtaparenka;
+package com.mtaparenka.pong;
 
+import com.mtaparenka.engine.ShaderContext;
 import com.mtaparenka.engine.camera.OrthographicCamera;
-import com.mtaparenka.engine.font.BitmapFont;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector4f;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
@@ -12,32 +11,42 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 public class TestScene {
     private final long windowId;
     private final OrthographicCamera camera;
-    private SpriteRenderer player1;
-    private SpriteRenderer ball;
-    private TextRenderer text;
+    private Player player1;
+    private Ball ball;
 
     private final float cameraSpeed = 1f;
 
     public TestScene(long windowId) {
         this.windowId = windowId;
+        float viewportWidth = 640f;
+        float viewportHeight = 400f;
+        float playerWidth = 10f;
+        float playerHeight = 80f;
+        float ballSize = 10f;
 
-        Vector4f whiteColor = new Vector4f(1f, 1f, 1f, 1f);
-        BitmapFont bitmapFont = new BitmapFont("assets/fonts/boldpixels.fnt", new Texture("assets/fonts/boldpixels_0.png"));
-        //player1 = SpriteRenderer.plainShape(whiteColor, 0f, 0f, 2f, 24f, shaderProgram);
-        player1 = SpriteRenderer.plainShape(whiteColor, new Vector2f(0f, 100 - 20f), 5f, 40f);
-        ball = SpriteRenderer.plainShape(whiteColor, new Vector2f(320f - 7, 100 - 2f), 5f, 5f);
-
-        text = new TextRenderer(bitmapFont, "sasa", new Vector2f(100f));
+        player1 = new Player(new Vector2f(0f, viewportHeight / 2 - playerHeight / 2), playerWidth, playerHeight);
+        ball = new Ball(new Vector2f(viewportWidth / 2 - ballSize / 2, viewportHeight / 2 - ballSize), ballSize, ballSize);
+        
         // model is a world-coordinate matrix, e.g. object placed at x = 100px, y = 200px
         Matrix4f model = new Matrix4f()
                 .identity();
 
         ShaderContext.get().setUniformMatrix4fv("model", model);
 
-        camera = new OrthographicCamera(0f, 320f, 200f, 0f); // 0.0 top-left
+        camera = new OrthographicCamera(0f, viewportWidth, viewportHeight, 0f); // 0.0 top-left
     }
 
     public void update(double dt) {
+
+        float speed = 0.5f;
+        double dx = Math.cos(Math.toRadians(2d)) * speed;
+        double dy = Math.sin(Math.toRadians(2d)) * 2;
+        ball.position.x -= dx;
+        ball.position.y -= dy;
+        ball.spriteRenderer.buildVertexBuffer();
+    }
+
+    public void render(double dt) {
         //camera
         ShaderContext.get().setUniformMatrix4fv("projectionView", camera.combined);
 
@@ -47,9 +56,6 @@ public class TestScene {
         //draw sprites
         player1.draw(dt);
         ball.draw(dt);
-        text.draw(dt);
-        text.setText("sasa1");
-
         glBindVertexArray(0);
     }
 

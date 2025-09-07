@@ -1,4 +1,4 @@
-package com.mtaparenka;
+package com.mtaparenka.engine;
 
 public class ShaderContext {
     private static ShaderProgram shaderProgram;

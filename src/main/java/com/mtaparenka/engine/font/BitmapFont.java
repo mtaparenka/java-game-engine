@@ -1,6 +1,6 @@
 package com.mtaparenka.engine.font;
 
-import com.mtaparenka.Texture;
+import com.mtaparenka.engine.Texture;
 
 import java.io.IOException;
 import java.nio.file.Files;

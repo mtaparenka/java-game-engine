@@ -1,6 +1,8 @@
-package com.mtaparenka;
+package com.mtaparenka.engine;
 
+import com.mtaparenka.pong.TestScene;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -11,8 +13,9 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Window {
     private static final String DEFAULT_VERTEX = "assets/shaders/default_vertex.glsl";
     private static final String DEFAULT_FRAGMENT = "assets/shaders/default_fragment.glsl";
-
-    private static double lastFrame = 0.0f;
+    private double updateRate = 60f;
+    private double updateInterval = 1.0 / updateRate;
+    private double accumulator = 0;
     public long window;
     private TestScene scene;
 
@@ -68,24 +71,32 @@ public class Window {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
         double dt;
+        double currentFrame;
+        double lastFrame = glfwGetTime();
 
         while (!glfwWindowShouldClose(window)) {
-            double currentFrame = glfwGetTime();
+            currentFrame = glfwGetTime();
             dt = currentFrame - lastFrame;
             lastFrame = currentFrame;
 
+            if (dt > 0.25) dt = 0.25;
+            accumulator += dt;
+
+            while (accumulator >= updateInterval) {
+                scene.update(updateInterval);
+                accumulator -= updateInterval;
+            }
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            scene.update(dt);
-
+            scene.render(dt);
             //System.out.printf("%.0f%n", (1.0f / dt));
-
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
 
         scene.dispose();
         ShaderContext.get().dispose();
+        glfwDestroyWindow(window);
     }
 }

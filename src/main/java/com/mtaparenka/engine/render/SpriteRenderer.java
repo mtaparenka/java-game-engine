@@ -1,6 +1,6 @@
-package com.mtaparenka;
+package com.mtaparenka.engine.render;
 
-import com.mtaparenka.engine.render.Base2DRenderer;
+import com.mtaparenka.engine.Texture;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
@@ -26,14 +26,14 @@ public class SpriteRenderer {
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        buildBVertexBuffer();
+        buildVertexBuffer();
     }
 
     public static SpriteRenderer plainShape(Vector4f color, Vector2f position, float width, float height) {
         return new SpriteRenderer("assets/sprites/white.png", color, position, width, height);
     }
 
-    private void buildBVertexBuffer() {
+    public void buildVertexBuffer() {
         float[] verticies = new float[]{ // top and bot can actually be reversed depending on matrix orientation
                 //position                          //tex coords
                 position.x + width,  position.y + height,     1.0f, 1.0f, // top right

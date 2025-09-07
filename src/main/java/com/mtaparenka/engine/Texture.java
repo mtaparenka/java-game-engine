@@ -1,4 +1,4 @@
-package com.mtaparenka;
+package com.mtaparenka.engine;
 
 import org.lwjgl.BufferUtils;
 
@@ -8,7 +8,6 @@ import java.nio.IntBuffer;
 import static org.lwjgl.stb.STBImage.stbi_image_free;
 import static org.lwjgl.stb.STBImage.stbi_load;
 import static org.lwjgl.opengl.GL46.*;
-import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 
 public class Texture {
     public final int texId;

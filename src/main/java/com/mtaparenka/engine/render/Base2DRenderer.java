@@ -1,7 +1,7 @@
 package com.mtaparenka.engine.render;
 
-import com.mtaparenka.ShaderContext;
-import com.mtaparenka.Texture;
+import com.mtaparenka.engine.ShaderContext;
+import com.mtaparenka.engine.Texture;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;

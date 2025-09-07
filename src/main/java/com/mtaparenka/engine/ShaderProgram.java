@@ -1,4 +1,4 @@
-package com.mtaparenka;
+package com.mtaparenka.engine;
 
 import org.joml.Matrix4f;
 import org.joml.Vector4f;

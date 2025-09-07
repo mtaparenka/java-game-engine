@@ -1,8 +1,7 @@
-package com.mtaparenka;
+package com.mtaparenka.engine.render;
 
 import com.mtaparenka.engine.font.BitmapFont;
 import com.mtaparenka.engine.font.Glyph;
-import com.mtaparenka.engine.render.Base2DRenderer;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
