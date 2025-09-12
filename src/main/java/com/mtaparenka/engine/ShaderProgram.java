@@ -5,9 +5,8 @@ import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.FloatBuffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static org.lwjgl.opengl.GL46.*;
 
@@ -30,8 +29,8 @@ public class ShaderProgram {
     }
 
     private void compileVertexShader(String vertexShaderFilePath) {
-        try {
-            glShaderSource(vertexShaderID, new String(Files.readAllBytes(Path.of(vertexShaderFilePath))));
+        try (InputStream in = getClass().getResourceAsStream(vertexShaderFilePath)){
+            glShaderSource(vertexShaderID, new String(in.readAllBytes()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -44,8 +43,8 @@ public class ShaderProgram {
     }
 
     private void compileFragmentShader(String fragmentShaderFilePath) {
-        try {
-            glShaderSource(fragmentShaderID, new String(Files.readAllBytes(Path.of(fragmentShaderFilePath))));
+        try (InputStream in = getClass().getResourceAsStream(fragmentShaderFilePath)){
+            glShaderSource(fragmentShaderID, new String(in.readAllBytes()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

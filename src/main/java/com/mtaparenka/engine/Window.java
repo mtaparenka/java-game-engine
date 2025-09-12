@@ -11,8 +11,8 @@ import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
-    private static final String DEFAULT_VERTEX = "assets/shaders/default_vertex.glsl";
-    private static final String DEFAULT_FRAGMENT = "assets/shaders/default_fragment.glsl";
+    private static final String DEFAULT_VERTEX = "/assets/shaders/default_vertex.glsl";
+    private static final String DEFAULT_FRAGMENT = "/assets/shaders/default_fragment.glsl";
     private double updateRate = 60f;
     private double updateInterval = 1.0 / updateRate;
     private double accumulator = 0;
@@ -30,6 +30,8 @@ public class Window {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
+        long monitor = glfwGetPrimaryMonitor();
+        GLFWVidMode videoMode = glfwGetVideoMode(monitor);
         window = glfwCreateWindow(1920, 1080, "Pong", NULL, NULL);
 
         if (window == NULL) {

@@ -10,6 +10,15 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    main {
+        resources {
+            srcDir(".")
+            include("assets/**")
+        }
+    }
+}
+
 val lwjglVersion = "3.3.4"
 val lwjglNatives = "natives-windows"
 
@@ -38,6 +47,6 @@ tasks.test {
 
 tasks.withType<Jar> {
     manifest {
-        attributes["Main-Class"] = "com.mtaparenka.Game"
+        attributes["Main-Class"] = "com.mtaparenka.pong.Game"
     }
 }

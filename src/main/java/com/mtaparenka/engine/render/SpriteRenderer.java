@@ -26,14 +26,14 @@ public class SpriteRenderer {
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        buildVertexBuffer();
+        update();
     }
 
     public static SpriteRenderer plainShape(Vector4f color, Vector2f position, float width, float height) {
-        return new SpriteRenderer("assets/sprites/white.png", color, position, width, height);
+        return new SpriteRenderer("/assets/sprites/white.png", color, position, width, height);
     }
 
-    public void buildVertexBuffer() {
+    public void update() {
         float[] verticies = new float[]{ // top and bot can actually be reversed depending on matrix orientation
                 //position                          //tex coords
                 position.x + width,  position.y + height,     1.0f, 1.0f, // top right

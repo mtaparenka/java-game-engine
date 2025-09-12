@@ -2,12 +2,14 @@ package com.mtaparenka.engine;
 
 import org.lwjgl.BufferUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.stb.STBImage.stbi_image_free;
-import static org.lwjgl.stb.STBImage.stbi_load;
 import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
 
 public class Texture {
     public final int texId;
@@ -23,28 +25,37 @@ public class Texture {
 
         //stbi_set_flip_vertically_on_load(true);
 
-        IntBuffer width = BufferUtils.createIntBuffer(1);
-        IntBuffer height = BufferUtils.createIntBuffer(1);
-        IntBuffer channels = BufferUtils.createIntBuffer(1);
+        try (InputStream in = getClass().getResourceAsStream(imagePath)) {
+            byte[] bytes = in.readAllBytes();
+            ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length);
+            buffer.put(bytes).flip();
 
-        ByteBuffer imageData = stbi_load(imagePath, width, height, channels, 0);
+            IntBuffer width = BufferUtils.createIntBuffer(1);
+            IntBuffer height = BufferUtils.createIntBuffer(1);
+            IntBuffer channels = BufferUtils.createIntBuffer(1);
 
-        if (imageData == null) {
-            throw new RuntimeException("Failed to load texture");
+            ByteBuffer imageData = stbi_load_from_memory(buffer, width, height, channels, 0);
+
+            if (imageData == null) {
+                throw new RuntimeException("Failed to load texture");
+            }
+
+            int format = 0;
+
+            if (channels.get(0) == 3) {
+                format = GL_RGB;
+            } else if (channels.get(0) == 4) {
+                format = GL_RGBA;
+            } else if (channels.get(0) == 1){
+                format = GL_RED;
+            }
+
+            glTexImage2D(GL_TEXTURE_2D, 0, format, width.get(0), height.get(0), 0, format, GL_UNSIGNED_BYTE, imageData);
+
+            stbi_image_free(imageData);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        int format = 0;
-
-        if (channels.get(0) == 3) {
-            format = GL_RGB;
-        } else if (channels.get(0) == 4) {
-            format = GL_RGBA;
-        } else if (channels.get(0) == 1){
-            format = GL_RED;
-        }
-
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width.get(0), height.get(0), 0, format, GL_UNSIGNED_BYTE, imageData);
-
-        stbi_image_free(imageData);
     }
 
     public void bind() {
