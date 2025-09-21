@@ -75,7 +75,6 @@ public class Window {
         double dt;
         double currentFrame;
         double lastFrame = glfwGetTime();
-
         while (!glfwWindowShouldClose(window)) {
             currentFrame = glfwGetTime();
             dt = currentFrame - lastFrame;
@@ -88,7 +87,7 @@ public class Window {
                 scene.update(updateInterval);
                 accumulator -= updateInterval;
             }
-            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            glClearColor(0f, 0f, 0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
             scene.render(dt);

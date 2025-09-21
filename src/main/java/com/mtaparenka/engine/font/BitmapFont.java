@@ -2,7 +2,10 @@ package com.mtaparenka.engine.font;
 
 import com.mtaparenka.engine.Texture;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -24,8 +27,9 @@ public class BitmapFont {
     public BitmapFont(String fntPath, Texture atlasTexture) {
         this.atlasTexture = atlasTexture;
 
-        try {
-            for (String line : Files.readAllLines(Path.of(fntPath))) {
+        try (InputStream is = getClass().getResourceAsStream(fntPath)){
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            for (String line : reader.lines().toList()) {
                 if (line.startsWith("char id")) {
                     Glyph glyph = getGlyph(line);
                     glyphs.put(glyph.id(), glyph);
