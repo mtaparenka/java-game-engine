@@ -33,7 +33,7 @@ public class SpriteRenderer {
         return new SpriteRenderer("/assets/sprites/white.png", color, position, width, height);
     }
 
-    public void update() {
+    public void  update() {
         float[] verticies = new float[]{ // top and bot can actually be reversed depending on matrix orientation
                 //position                          //tex coords
                 position.x + width,  position.y + height,     1.0f, 1.0f, // top right

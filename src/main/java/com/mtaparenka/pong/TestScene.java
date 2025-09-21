@@ -2,7 +2,9 @@ package com.mtaparenka.pong;
 
 import com.mtaparenka.engine.ShaderContext;
 import com.mtaparenka.engine.Timer;
+import com.mtaparenka.engine.Window;
 import com.mtaparenka.engine.camera.OrthographicCamera;
+import com.mtaparenka.engine.render.Scene;
 import com.mtaparenka.engine.render.TextRenderer;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -12,8 +14,8 @@ import java.util.Random;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
-public class TestScene {
-    private final long windowId;
+public class TestScene extends Scene {
+    private final Window window;
     private final OrthographicCamera camera;
     private final Player player1;
     private final Player player2;
@@ -26,11 +28,10 @@ public class TestScene {
     private final float playerWidth = 10f;
     private final float playerHeight = 80f;
     private final float ballSize = 10f;
-    private int winner;
     private boolean isGameFinished;
 
-    public TestScene(long windowId) {
-        this.windowId = windowId;
+    public TestScene(Window window) {
+        this.window = window;
 
         player1 = new Player(new Vector2f(0f, viewportHeight / 2 - playerHeight / 2), playerWidth, playerHeight);
         player2 = new Player(new Vector2f(viewportWidth - playerWidth, viewportHeight / 2 - playerHeight / 2), playerWidth, playerHeight);
@@ -38,7 +39,7 @@ public class TestScene {
         player2Score = new TextRenderer("0", new Vector2f(viewportWidth / 2 + 40f, 20f), new Vector2f(3f));
         winText = new TextRenderer("Player 1 won", new Vector2f(viewportWidth / 2 - 125f, viewportHeight / 2 - 120f), new Vector2f(3f));
         ball = new Ball(new Vector2f(viewportWidth / 2 - ballSize / 2, viewportHeight / 2 - ballSize), ballSize, ballSize);
-        
+
         // model is a world-coordinate matrix, e.g. object placed at x = 100px, y = 200px
         Matrix4f model = new Matrix4f()
                 .identity();
@@ -46,6 +47,7 @@ public class TestScene {
         ShaderContext.get().setUniformMatrix4fv("model", model);
 
         camera = new OrthographicCamera(0f, viewportWidth, viewportHeight, 0f); // 0.0 top-left
+        ShaderContext.get().setUniformMatrix4fv("projectionView", camera.combined);
     }
 
     Random random = new Random();
@@ -55,7 +57,7 @@ public class TestScene {
     double dy = Math.sin(Math.toRadians(random.nextDouble(26d))) * ySpeed;
     Timer timer = new Timer();
 
-    public void update(double dt) {
+    public void updatePhysics(double dt) {
         if (!isGameFinished) {
             if (ball.position.x <= 0) {
                 handleScore(player2Score);
@@ -82,12 +84,29 @@ public class TestScene {
         }
     }
 
+    public void update(double dt) {
+        processInput();
+        camera.update();
+
+        //draw sprites
+        player1.draw(dt);
+        player2.draw(dt);
+        ball.draw(dt);
+        player1Score.draw(dt);
+        player2Score.draw(dt);
+
+        if (isGameFinished) {
+            winText.draw(dt);
+        }
+        glBindVertexArray(0);
+    }
+
     private void handleScore(TextRenderer playerScore) {
         int newScore = Integer.parseInt(playerScore.text) + 1;
 
         if (newScore == 5) {
             isGameFinished = true;
-            winner = playerScore == player1Score ? 1 : 2;
+            int winner = playerScore == player1Score ? 1 : 2;
             winText.update("Player " + winner + " won");
         }
 
@@ -107,42 +126,22 @@ public class TestScene {
         dy = Math.sin(bounceAngle) * ySpeed;
     }
 
-    public void render(double dt) {
-        //camera
-        ShaderContext.get().setUniformMatrix4fv("projectionView", camera.combined);
-
-        processInput();
-        camera.update();
-
-        //draw sprites
-        player1.draw(dt);
-        player2.draw(dt);
-        ball.draw(dt);
-        player1Score.draw(dt);
-        player2Score.draw(dt);
-
-        if (isGameFinished) {
-            winText.draw(dt);
-        }
-        glBindVertexArray(0);
-    }
-
     public void dispose() {
 
     }
 
     public void processInput() {
-        if (glfwGetKey(windowId, GLFW_KEY_W) == GLFW_PRESS && player1.position.y >= 0) {
+        if (glfwGetKey(window.id, GLFW_KEY_W) == GLFW_PRESS && player1.position.y >= 0) {
             player1.position.y -= 1f;
         }
-        if (glfwGetKey(windowId, GLFW_KEY_S) == GLFW_PRESS && player1.position.y + playerHeight <= viewportHeight) {
+        if (glfwGetKey(window.id, GLFW_KEY_S) == GLFW_PRESS && player1.position.y + playerHeight <= viewportHeight) {
             player1.position.y += 1f;
         }
 
-        if (glfwGetKey(windowId, GLFW_KEY_UP) == GLFW_PRESS && player2.position.y >= 0) {
+        if (glfwGetKey(window.id, GLFW_KEY_UP) == GLFW_PRESS && player2.position.y >= 0) {
             player2.position.y -= 1f;
         }
-        if (glfwGetKey(windowId, GLFW_KEY_DOWN) == GLFW_PRESS && player2.position.y + playerHeight <= viewportHeight) {
+        if (glfwGetKey(window.id, GLFW_KEY_DOWN) == GLFW_PRESS && player2.position.y + playerHeight <= viewportHeight) {
             player2.position.y += 1f;
         }
     }
